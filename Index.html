@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideShare Pro: Monthly School & Work Transportation</title>
+    <style>
+        /* CSS styles (enhanced version) */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        .driver-card, .ride-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .driver-card button, .ride-card button {
+            background-color: #2ecc71;
+            margin-top: 10px;
+        }
+        .driver-card button:hover, .ride-card button:hover {
+            background-color: #27ae60;
+        }
+        .star-rating {
+            color: #f1c40f;
+            font-size: 20px;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border-radius: 4px;
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+        }
+        #adminPanel button {
+            background-color: #e74c3c;
+        }
+        #adminPanel button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RideShare Pro: Monthly School & Work Transportation</h1>
+        
+        <div id="loginForm" class="section">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button onclick="login()">Login</button>
+            <p>Don't have an account? <a href="#" onclick="showSection('registerForm')">Register</a></p>
+        </div>
+
+        <div id="registerForm" class="section">
+            <h2>Register</h2>
+            <div class="form-group">
+                <label for="regName">Name:</label>
+                <input type="text" id="regName" required>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" required>
+            </div>
+            <button onclick="register()">Register</button>
+            <p>Already have an account? <a href="#" onclick="showSection('loginForm')">Login</a></p>
+        </div>
+
+        <div id="userDashboard" class="section">
+            <h2>Welcome, <span id="userName"></span>!</h2>
+            <button onclick="showSection('bookRideSection')">Book New Ride</button>
+            <div id="currentSubscription"></div>
+            <button onclick="showSection('rideHistorySection')">View Ride History</button>
+            <button onclick="showSection('paymentHistorySection')">View Payment History</button>
+            <button onclick="showSection('userProfileSection')">Edit Profile</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div id="bookRideSection" class="section">
+            <h2>Available Drivers</h2>
+            <div id="driverList"></div>
+        </div>
+
+        <div id="subscriptionDetails" class="section">
+            <h2>Subscription Details</h2>
+            <div id="subscriptionInfo"></div>
+        </div>
+
+        <div id="rideHistorySection" class="section">
+            <h2>Ride History</h2>
+            <div id="rideHistoryList"></div>
+        </div>
+
+        <div id="paymentHistorySection" class="section">
+            <h2>Payment History</h2>
+            <div id="paymentHistoryList"></div>
+        </div>
+
+        <div id="userProfileSection" class="section">
+            <h2>Edit Profile</h2>
+            <div class="form-group">
+                <label for="profileName">Name:</label>
+                <input type="text" id="profileName">
+            </div>
+            <div class="form-group">
+                <label for="profileEmail">Email:</label>
+                <input type="email" id="profileEmail">
+            </div>
+            <button onclick="updateProfile()">Update Profile</button>
+        </div>
+
+        <div id="adminPanel" class="section">
+            <h2>Admin Panel</h2>
+            <button onclick="showSection('manageDriversSection')">Manage Drivers</button>
+            <button onclick="showSection('manageSubscriptionsSection')">Manage Subscriptions</button>
+        </div>
+
+        <div id="manageDriversSection" class="section">
+            <h2>Manage Drivers</h2>
+            <div id="driverManagementList"></div>
+            <button onclick="showAddDriverForm()">Add New Driver</button>
+        </div>
+
+        <div id="manageSubscriptionsSection" class="section">
+            <h2>Manage Subscriptions</h2>
+            <div id="subscriptionManagementList"></div>
+        </div>
+
+        <div id="addDriverForm" class="section">
+            <h2>Add New Driver</h2>
+            <div class="form-group">
+                <label for="newDriverName">Name:</label>
+                <input type="text" id="newDriverName" required>
+            </div>
+            <div class="form-group">
+                <label for="newDriverRate">Monthly Rate:</label>
+                <input type="number" id="newDriverRate" required>
+            </div>
+            <button onclick="addNewDriver()">Add Driver</button>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Simulated backend data
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let drivers = JSON.parse(localStorage.getItem('drivers')) || [
+            { id: 1, name: "John Doe", rating: 4.8, monthlyRate: 200 },
+            { id: 2, name: "Jane Smith", rating: 4.9, monthlyRate: 220 },
+            { id: 3, name: "Mike Johnson", rating: 4.7, monthlyRate: 190 }
+        ];
+        let subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
+        let rides = JSON.parse(localStorage.getItem('rides')) || [];
+        let payments = JSON.parse(localStorage.getItem('payments')) || [];
+
+        // Helper function to show a specific section
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Helper function to show a notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // User Authentication
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = users.find(u => u.email === email && u.password === password);
+            if (user) {
+                currentUser = user;
+                showNotification('Login successful!');
+                if (user.isAdmin) {
+                    showSection('adminPanel');
+                } else {
+                    showUserDashboard();
+                }
+            } else {
+                showNotification('Invalid credentials');
+            }
+        }
+
+        function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            if (users.some(u => u.email === email)) {
+                showNotification('Email already registered');
+                return;
+            }
+            const newUser = { id: users.length + 1, name, email, password, isAdmin: false };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            showNotification('Registration successful. Please login.');
+            showSection('loginForm');
+        }
+
+        function logout() {
+            currentUser = null;
+            showSection('loginForm');
+            showNotification('Logged out successfully');
+        }
+
+        // User Dashboard
+        function showUserDashboard() {
+            document.getElementById('userName').textContent = currentUser.name;
+            updateCurrentSubscription();
+            showSection('userDashboard');
+        }
+
+        function updateCurrentSubscription() {
+            const subscription = subscriptions.find(s => s.userId === currentUser.id);
+            const subscriptionDiv = document.getElementById('currentSubscription');
+            if (subscription) {
+                const driver = drivers.find(d => d.id === subscription.driverId);
+                subscriptionDiv.innerHTML = `
+                    <h3>Current Subscription</h3>
+                    <p>Driver: ${driver.name}</p>
+                    <p>Monthly Rate: $${driver.monthlyRate}</p>
+                    <p>Start Date: ${new Date(subscription.startDate).toLocaleDateString()}</p>
+                `;
+            } else {
+                subscriptionDiv.innerHTML = '<p>You have no active subscription.</p>';
+            }
+        }
+
+        // Booking a new ride
+        function showDriverList() {
+            let driverHTML = "";
+            drivers.forEach(driver => {
+                driverHTML += `
+                    <div class="driver-card">
+                        <h3>${driver.name}</h3>
+                        <p>Rating: <span class="star-rating">${'★'.repeat(Math.round(driver.rating))}</span> ${driver.rating}/5</p>
+                        <p>Monthly Rate: $${driver.monthlyRate}</p>
+                        <button onclick="selectDriver(${driver.id})">Select This Driver</button>
+                    </div>
+                `;
+            });
+            document.getElementById('driverList').innerHTML = driverHTML;
+        }
+
+        function selectDriver(driverId) {
+            const driver = drivers.find(d => d.id === driverId);
+            const subscriptionInfo = document.getElementById('subscriptionInfo');
+            const adminFee = driver.monthlyRate * 0.2;
+            const totalCost = driver.monthlyRate + adminFee;
+
+            subscriptionInfo.innerHTML = `
+                <p><strong>Driver:</strong> ${driver.name}</p>
+                <p><strong>Monthly Rate:</strong> $${driver.monthlyRate}</p>
+                <p><strong>Administration Fee (20%):</strong> $${adminFee}</p>
+                <p><strong>Total Monthly Cost:</strong> $${totalCost}</p>
+                <button onclick="confirmSubscription(${driver.id}, ${totalCost})">Confirm Subscription</button>
+            `;
+            showSection('subscriptionDetails');
+        }
+
+        function confirmSubscription(driverId, totalCost) {
+            // Simulated payment processing
+            showNotification('Processing payment...');
+            setTimeout(() => {
+                const newSubscription = {
+                    id: subscriptions.length + 1,
+                    userId: currentUser.id,
+                    driverId: driverId,
+                    totalCost: totalCost,
+                    startDate: new Date().toISOString()
+                };
+                subscriptions.push(newSubscription);
+                localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+
+                // Record the payment
+                const payment = {
+                    id: payments.length + 1,
+                    userId: currentUser.id,
+                    amount: totalCost,
+                    date: new Date().toISOString(),
+                    description: `Monthly subscription payment`
+                };
+                payments.push(payment);
+                localStorage.setItem('payments', JSON.stringify(payments));
+
+                showNotification('Subscription confirmed! Your monthly transportation service will begin soon.');
+                updateCurrentSubscription();
+                showUserDashboard();
+            }, 2000);
+        }
+
+        // Ride History
+        function showRideHistory() {
+            const userRides = rides.filter(ride => ride.userId === currentUser.id);
+            let rideHistoryHTML = userRides.length ? "" : "<p>No ride history available.</p>";
+            userRides.forEach(ride => {
+                const driver = drivers.find(d => d.id === ride.driverId);
+                rideHistoryHTML += `
+                    <div class="ride-card">
+                        <p><strong>Date:</strong> ${new Date(ride.date).toLocaleDateString()}</p>
+                        <p><strong>Driver:</strong> ${driver.name}</p>
+                        <p><strong>Status:</strong> ${ride.status}</p>
+                        <button onclick="rateRide(${ride.id})">Rate this Ride</button>
+                    </div>
+                `;
+            });
+            document.getElementById('rideHistoryList').innerHTML = rideHistoryHTML;
+        }
+
+        function rateRide(rideId) {
+            const rating = prompt("Rate this ride from 1 to 5 stars:");
+            if (rating && rating >= 1 && rating <= 5) {
+                const ride = rides.find(r => r.id === rideId);
+                ride.rating = parseInt(rating);
+                localStorage.setItem('rides', JSON.stringify(rides));
+                showNotification('Thank you for rating your ride!');
+                showRideHistory();
+            } else {
+                showNotification('Invalid rating. Please enter a number between 1 and 5.');
+            }
+        }
+
+        // Payment History
+        function showPaymentHistory() {
+            const userPayments = payments.filter(payment => payment.userId === currentUser.id);
+            let paymentHistoryHTML = userPayments.length ? "" : "<p>No payment history available.</p>";
+            userPayments.forEach(payment => {
+                paymentHistoryHTML += `
+                    <div class="payment-card">
+                        <p><strong>Date:</strong> ${new Date(payment.date).toLocaleDateString()}</p>
+                        <p><strong>Amount:</strong> $${payment.amount}</p>
+                        <p><strong>Description:</strong> ${payment.description}</p>
+                    </div>
+                `;
+            });
+            document.getElementById('paymentHistoryList').innerHTML = paymentHistoryHTML;
+        }
+
+        // User Profile
+        function showUserProfile() {
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+        }
+
+        function updateProfile() {
+            const newName = document.getElementById('profileName').value;
+            const newEmail = document.getElementById('profileEmail').value;
+            if (newName && newEmail) {
+                currentUser.name = newName;
+                currentUser.email = newEmail;
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                users[userIndex] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                showNotification('Profile updated successfully');
+                showUserDashboard();
+            } else {
+                showNotification('Please fill in all fields');
+            }
+        }
+
+        // Admin Functions
+        function showDriverManagement() {
+            let driverManagementHTML = "";
+            drivers.forEach(driver => {
+                driverManagementHTML += `
+                    <div class="driver-card">
+                        <h3>${driver.name}</h3>
+                        <p>Rating: ${driver.rating}/5</p>
+                        <p>Monthly Rate: $${driver.monthlyRate}</p>
+                        <button onclick="editDriver(${driver.id})">Edit</button>
+                        <button onclick="removeDriver(${driver.id})">Remove</button>
+                    </div>
+                `;
+            });
+            document.getElementById('driverManagementList').innerHTML = driverManagementHTML;
+        }
+
+        function showAddDriverForm() {
+            showSection('addDriverForm');
+        }
+
+        function addNewDriver() {
+            const name = document.getElementById('newDriverName').value;
+            const rate = document.getElementById('newDriverRate').value;
+            if (name && rate) {
+                const newDriver = {
+                    id: drivers.length + 1,
+                    name: name,
+                    rating: 0,
+                    monthlyRate: parseFloat(rate)
+                };
+                drivers.push(newDriver);
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                showNotification('New driver added successfully');
+                showDriverManagement();
+            } else {
+                showNotification('Please fill in all fields');
+            }
+        }
+
+        function editDriver(driverId) {
+            const driver = drivers.find(d => d.id === driverId);
+            const newName = prompt("Enter new name for driver:", driver.name);
+            const newRate = prompt("Enter new monthly rate for driver:", driver.monthlyRate);
+            if (newName && newRate) {
+                driver.name = newName;
+                driver.monthlyRate = parseFloat(newRate);
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                showNotification('Driver updated successfully');
+                showDriverManagement();
+            }
+        }
+
+        function removeDriver(driverId) {
+            if (confirm("Are you sure you want to remove this driver?")) {
+                drivers = drivers.filter(d => d.id !== driverId);
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                showNotification('Driver removed successfully');
+                showDriverManagement();
+            }
+        }
+
+        function showSubscriptionManagement() {
+            let subscriptionManagementHTML = "";
+            subscriptions.forEach(sub => {
+                const user = users.find(u => u.id === sub.userId);
+                const driver = drivers.find(d => d.id === sub.driverId);
+                subscriptionManagementHTML += `
+                    <div class="subscription-card">
+                        <p><strong>User:</strong> ${user.name}</p>
+                        <p><strong>Driver:</strong> ${driver.name}</p>
+                        <p><strong>Start Date:</strong> ${new Date(sub.startDate).toLocaleDateString()}</p>
+                        <p><strong>Monthly Cost:</strong> $${sub.totalCost}</p>
+                        <button onclick="cancelSubscription(${sub.id})">Cancel Subscription</button>
+                    </div>
+                `;
+            });
+            document.getElementById('subscriptionManagementList').innerHTML = subscriptionManagementHTML;
+        }
+
+        function cancelSubscription(subId) {
+            if (confirm("Are you sure you want to cancel this subscription?")) {
+                subscriptions = subscriptions.filter(s => s.id !== subId);
+                localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+                showNotification('Subscription cancelled successfully');
+                showSubscriptionManagement();
+            }
+        }
+
+        // Initialize the app
+        showSection('loginForm');
+
+        // Event listeners for section navigation
+        document.querySelectorAll('button[onclick^="showSection"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const sectionId = e.target.getAttribute('onclick').match(/'([^']+)'/)[1];
+                if (sectionId === 'bookRideSection') {
+                    showDriverList();
+                } else if (sectionId === 'rideHistorySection') {
+                    showRideHistory();
+                } else if (sectionId === 'paymentHistorySection') {
+                    showPaymentHistory();
+                } else if (sectionId === 'userProfileSection') {
+                    showUserProfile();
+                } else if (sectionId === 'manageDriversSection') {
+                    showDriverManagement();
+                } else if (sectionId === 'manageSubscriptionsSection') {
+                    showSubscriptionManagement();
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
